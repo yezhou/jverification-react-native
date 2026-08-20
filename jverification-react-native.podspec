@@ -12,11 +12,14 @@ Pod::Spec.new do |s|
   
   s.ios.deployment_target = '11.0'
 
-  s.source          = { :git => "https://github.com/jpush/jverification-react-native.git", :tag => "#{s.version}" }
+  s.source          = { :git => "https://github.com/yezhou/jverification-react-native.git", :tag => "#{s.version}" }
   s.source_files    = 'ios/RCTJVerificationModule/*.{h,m}'
   s.preserve_paths  = "*.js"
   s.frameworks      = 'UIKit','CFNetwork','CoreFoundation','CoreTelephony','SystemConfiguration','CoreGraphics','Foundation','Security', 'AdSupport', 'CoreLocation','NetworkExtension', 'MobileCoreServices'
   s.libraries       = 'z','resolv', 'sqlite3', 'c++.1'
   s.vendored_frameworks = "ios/RCTJVerificationModule/*.xcframework"
+  s.resource_bundles = {
+    'JVerificationResource' => ['AwesomeProject/ios/JVerificationResource.bundle/*.png']
+  }
   s.dependency 'React'
 end

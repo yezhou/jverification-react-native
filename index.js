@@ -113,6 +113,14 @@ export default class JVerification {
         }
     }
 
+    static setSecureControl(enable) {
+        JVerificationModule.setSecureControl(enable);
+    }
+
+    static setCollectControl(params) {
+        JVerificationModule.setCollectControl(params || {});
+    }
+
     /*
      * SDK初始化
      * @param params = {'time':int,'appkey':String,'channel':String,'advertisingId':String,'isProduction':boolean}

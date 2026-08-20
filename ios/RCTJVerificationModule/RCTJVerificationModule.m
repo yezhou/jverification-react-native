@@ -269,6 +269,20 @@ RCT_EXPORT_METHOD(setDebug: (BOOL )enable)
     debug = enable;
 }
 
+RCT_EXPORT_METHOD(setSecureControl: (BOOL )enable)
+{
+    [JVERIFICATIONService setSecureControl:enable];
+}
+
+RCT_EXPORT_METHOD(setCollectControl: (NSDictionary *)params)
+{
+    JVCollectControl *control = [[JVCollectControl alloc] init];
+    if ([params[@"cell"] isKindOfClass:[NSNumber class]]) {
+        control.cell = [params[@"cell"] boolValue];
+    }
+    [JVERIFICATIONService setCollectControl:control];
+}
+
 RCT_EXPORT_METHOD(setupWithConfig: (NSDictionary *)params
                   callback: (RCTResponseSenderBlock)callback)
 {
@@ -2008,4 +2022,3 @@ static int ctagId = 100000;
 }
 
 @end
-

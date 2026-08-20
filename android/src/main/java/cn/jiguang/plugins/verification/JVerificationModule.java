@@ -38,6 +38,7 @@ import cn.jiguang.plugins.verification.common.JLogger;
 import cn.jiguang.verifysdk.api.AuthPageBackPressedListener;
 import cn.jiguang.verifysdk.api.AuthPageEventListener;
 import cn.jiguang.verifysdk.api.JVerificationInterface;
+import cn.jiguang.verifysdk.api.JVerifyCollectControl;
 import cn.jiguang.verifysdk.api.JVerifyLoginBtClickCallback;
 import cn.jiguang.verifysdk.api.JVerifyUIConfig;
 import cn.jiguang.verifysdk.api.PreLoginListener;
@@ -68,6 +69,31 @@ public class JVerificationModule extends ReactContextBaseJavaModule {
     public void setDebugMode(boolean enable){
         JVerificationInterface.setDebugMode(enable);
         JLogger.setLoggerEnable(enable);
+    }
+
+    @ReactMethod
+    public void setSecureControl(boolean enable){
+        JVerificationInterface.setSecureControl(reactContext, enable);
+    }
+
+    @ReactMethod
+    public void setCollectControl(ReadableMap readableMap){
+        JVerifyCollectControl.Builder collectControl = new JVerifyCollectControl.Builder();
+        if (readableMap != null) {
+            if (readableMap.hasKey("imei")) {
+                collectControl.imei(readableMap.getBoolean("imei"));
+            }
+            if (readableMap.hasKey("mac")) {
+                collectControl.mac(readableMap.getBoolean("mac"));
+            }
+            if (readableMap.hasKey("imsi")) {
+                collectControl.imsi(readableMap.getBoolean("imsi"));
+            }
+            if (readableMap.hasKey("cell")) {
+                collectControl.cell(readableMap.getBoolean("cell"));
+            }
+        }
+        JVerificationInterface.setCollectControl(reactContext, collectControl.build());
     }
 
     @ReactMethod
