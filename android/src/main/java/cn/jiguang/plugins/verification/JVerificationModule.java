@@ -41,6 +41,7 @@ import cn.jiguang.verifysdk.api.JVerificationInterface;
 import cn.jiguang.verifysdk.api.JVerifyCollectControl;
 import cn.jiguang.verifysdk.api.JVerifyLoginBtClickCallback;
 import cn.jiguang.verifysdk.api.JVerifyUIConfig;
+import cn.jiguang.verifysdk.api.LoginSettings;
 import cn.jiguang.verifysdk.api.PreLoginListener;
 import cn.jiguang.verifysdk.api.PrivacyBean;
 import cn.jiguang.verifysdk.api.RequestCallback;
@@ -160,7 +161,16 @@ public class JVerificationModule extends ReactContextBaseJavaModule {
         }
         applyAuthPageBackPressedListener();
         JVerificationInterface.setCustomUIWithConfig(builder.build());
-        JVerificationInterface.loginAuth(reactContext, enable, new VerifyListener() {
+        LoginSettings settings = new LoginSettings();
+        settings.setAutoFinish(enable);
+        settings.setTimeout(time);
+        settings.setAuthPageEventListener(new AuthPageEventListener() {
+            @Override
+            public void onEvent(int code, String content) {
+                sendEvent(JConstans.LOGIN_EVENT,convertToResult(code,content));
+            }
+        });
+        JVerificationInterface.loginAuth(reactContext, settings, new VerifyListener() {
             @Override
             public void onResult(int code, String content, String operator, final JSONObject operatorReturn) {
                 reactContext.runOnUiQueueThread(new Runnable() {
@@ -181,11 +191,6 @@ public class JVerificationModule extends ReactContextBaseJavaModule {
                         sendEvent(JConstans.LOGIN_EVENT,m);
                     }
                 });
-            }
-        }, new AuthPageEventListener() {
-            @Override
-            public void onEvent(int code, String content) {
-                sendEvent(JConstans.LOGIN_EVENT,convertToResult(code,content));
             }
         });
     }

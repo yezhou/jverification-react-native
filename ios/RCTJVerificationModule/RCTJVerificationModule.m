@@ -651,7 +651,22 @@ RCT_EXPORT_METHOD(setTimeWithConfig: (double)timeInter )
 -(JVUIConfig *)convertToCinfig: (NSDictionary *)configParams
 {
     JVUIConfig *config = [[JVUIConfig alloc] init];
-    config.autoLayout = true;
+    BOOL hasLogoLayout = configParams[LOGO_CONSTRAINTS] ||
+        (configParams[LOGO_X] && configParams[LOGO_Y] && configParams[LOGO_W] && configParams[LOGO_H]);
+    BOOL hasNumberLayout = configParams[NUMBER_CONSTRAINTS] ||
+        (configParams[NUMBER_X] && configParams[NUMBER_Y] && configParams[NUMBER_W] && configParams[NUMBER_H]);
+    BOOL hasSloganLayout = configParams[SLOGAN_CONSTRAINTS] ||
+        (configParams[SLOGAN_X] && configParams[SLOGAN_Y] && configParams[SLOGAN_W] && configParams[SLOGAN_H]);
+    BOOL hasLoginButtonLayout = configParams[LOGIN_BTN_CONSTRAINTS] ||
+        (configParams[LOGIN_BTN_X] && configParams[LOGIN_BTN_Y] && configParams[LOGIN_BTN_W] && configParams[LOGIN_BTN_H]);
+    BOOL hasPrivacyLayout = configParams[PRIVACY_CONSTRAINTS] ||
+        (configParams[PRIVACY_X] && configParams[PRIVACY_Y] && configParams[PRIVACY_W] && configParams[PRIVACY_H]);
+    BOOL hasAuxiliaryLayout = configParams[CHECK_VIEW_CONSTRAINTS] ||
+        configParams[WINDOW_CONSTRAINTS] || configParams[WINDOW_HORIZONTAL_CONSTRAINTS] ||
+        configParams[WINDOW_CLOSE_BTN_CONSTRAINTS] || configParams[WINDOW_CLOSE_BTN_HORIZONTAL_CONSTRAINTS] ||
+        configParams[LOADING_CONSTRAINTS];
+    config.autoLayout = hasLogoLayout || hasNumberLayout || hasSloganLayout ||
+        hasLoginButtonLayout || hasPrivacyLayout || hasAuxiliaryLayout;
     if (debug) {
         NSLog(@"configParams:%@",configParams);
     }
