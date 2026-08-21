@@ -130,6 +130,9 @@ static smsLogin(enable: boolean, time: number, callback: (result: {
 
 设置一键登录页面样式。所有配置项均为可选，需要在 login 前调用生效。
 
+在 iOS 上，图片名称会优先从宿主应用的 asset catalog 解析，再回退到
+`JVerificationResource.bundle`，因此 `logoImage` 等品牌资源无需复制进 SDK 包。
+
 > ⚠️ **注意**：`customViewParams` 参数已废弃，由于 React Native 版本兼容性问题，不再支持通过该参数添加自定义 React Native 组件。如需添加自定义控件，请使用 `customWidgetList` 参数。
 
 ```typescript

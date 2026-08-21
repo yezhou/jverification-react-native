@@ -1802,6 +1802,12 @@ RCT_EXPORT_METHOD(setTimeWithConfig: (double)timeInter )
     if (![imageName isKindOfClass:[NSString class]]) {
         return nil;
     }
+    // Let applications provide branded assets through their own asset catalog.
+    // Fall back to the SDK bundle for the built-in controls.
+    UIImage *applicationImage = [UIImage imageNamed:imageName];
+    if (applicationImage) {
+        return applicationImage;
+    }
     NSString *bundlePath = [[NSBundle mainBundle] pathForResource:JVERIFICATION_RESOURCE ofType:@"bundle"];
     UIImage *image= [UIImage imageWithContentsOfFile:[bundlePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",imageName]]];
     return image;
