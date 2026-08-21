@@ -339,6 +339,10 @@ export default class JVerification {
      *       privacyY:int                              //隐私条款相对于页面下边缘y偏移
      *       privacyW:int                              //隐私条款宽度
      *       privacyH:int                              //隐私条款高度
+     *       privacyMarginL:int                        //隐私条款相对于登录页左边的间距（仅Android）
+     *       privacyMarginR:int                        //隐私条款相对于登录页右边的间距（仅Android）
+     *       privacyMarginT:int                        //隐私条款相对于登录页顶部的间距（仅Android）
+     *       privacyMarginB:int                        //隐私条款相对于登录页底部的间距（仅Android）
      *       textVerAlignment: String                  //设置条款文字是否垂直居中对齐(默认居中对齐) 0是top 1是m 2是b only iOS
      *       openPrivacyInBrowser: boolean            //是否在浏览器中打开隐私条款 默认是false  
      * 

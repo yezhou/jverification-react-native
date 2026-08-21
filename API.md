@@ -223,6 +223,10 @@ static addLoginCustomConfig(customConfigParams: {
     privacyY?: number,                          // 隐私条款相对于页面下边缘y偏移
     privacyW?: number,                          // 隐私条款宽度
     privacyH?: number,                          // 隐私条款高度
+    privacyMarginL?: number,                    // 隐私条款相对于登录页左边的间距（仅Android）
+    privacyMarginR?: number,                    // 隐私条款相对于登录页右边的间距（仅Android）
+    privacyMarginT?: number,                    // 隐私条款相对于登录页顶部的间距（仅Android）
+    privacyMarginB?: number,                    // 隐私条款相对于登录页底部的间距（仅Android）
     textVerAlignment?: string,                  // 设置条款文字是否垂直居中对齐(默认居中对齐) 0是top 1是m 2是b only iOS
     openPrivacyInBrowser?: boolean,             // 是否在浏览器中打开隐私条款 默认是false  
 

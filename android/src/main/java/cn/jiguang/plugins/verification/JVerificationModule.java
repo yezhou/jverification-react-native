@@ -629,11 +629,21 @@ public class JVerificationModule extends ReactContextBaseJavaModule {
         }
         if(readableMap.hasKey(JConstans.PRIVACY_X)){
             builder.setPrivacyOffsetX(readableMap.getInt(JConstans.PRIVACY_X));
-            builder.setPrivacyMarginL(readableMap.getInt(JConstans.PRIVACY_X));
         }
         if(readableMap.hasKey(JConstans.PRIVACY_Y)){
             builder.setPrivacyOffsetY(readableMap.getInt(JConstans.PRIVACY_Y));
-            builder.setPrivacyMarginB(readableMap.getInt(JConstans.PRIVACY_Y));
+        }
+        if(readableMap.hasKey(JConstans.PRIVACY_MARGIN_L)){
+            builder.setPrivacyMarginL(readableMap.getInt(JConstans.PRIVACY_MARGIN_L));
+        }
+        if(readableMap.hasKey(JConstans.PRIVACY_MARGIN_R)){
+            builder.setPrivacyMarginR(readableMap.getInt(JConstans.PRIVACY_MARGIN_R));
+        }
+        if(readableMap.hasKey(JConstans.PRIVACY_MARGIN_T)){
+            builder.setPrivacyMarginT(readableMap.getInt(JConstans.PRIVACY_MARGIN_T));
+        }
+        if(readableMap.hasKey(JConstans.PRIVACY_MARGIN_B)){
+            builder.setPrivacyMarginB(readableMap.getInt(JConstans.PRIVACY_MARGIN_B));
         }
 
         if(readableMap.hasKey(JConstans.PRIVACY_CHECKBOX_OFFSET_X) && readableMap.hasKey(JConstans.PRIVACY_CHECKBOX_OFFSET_Y)){

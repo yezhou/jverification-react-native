@@ -109,6 +109,10 @@ public class JConstans {
     public static final String PRIVACY_Y = "privacyY";                                //隐私条款相对于授权页面底部下边缘y偏移
     public static final String PRIVACY_W = "privacyW";                                      //隐私条款名称外的文字栏宽度(单位:dp)
     public static final String PRIVACY_H = "privacyH";                                      //隐私条款名称外的文字栏高度度(单位:dp)
+    public static final String PRIVACY_MARGIN_L = "privacyMarginL";                         //隐私条款相对于登录页左边的间距 only android
+    public static final String PRIVACY_MARGIN_R = "privacyMarginR";                         //隐私条款相对于登录页右边的间距 only android
+    public static final String PRIVACY_MARGIN_T = "privacyMarginT";                         //隐私条款相对于登录页顶部的间距 only android
+    public static final String PRIVACY_MARGIN_B = "privacyMarginB";                         //隐私条款相对于登录页底部的间距 only android
     public static final String PRIVACY_BOOK_SYMBOL_ENABLE = "privacyBookSymbolEnable";      //隐私条款运营商协议名是否加书名号
     public static final String EnableHintToast = "unAgreePrivacyHintToast";                                      //导航栏颜色
 
