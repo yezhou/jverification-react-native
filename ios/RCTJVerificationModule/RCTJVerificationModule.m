@@ -87,6 +87,7 @@
 #define LOGIN_BTN_SELECTED_IMAGE        @"loginBtnSelectedImage"    //登录按钮按下图片  (仅ios,三个同时设置生效）
 #define LOGIN_BTN_BACKGROUND_COLOR      @"loginBtnBackgroundColor"  //登录按钮正常/失效背景色（仅ios）
 #define LOGIN_BTN_PRESSED_BACKGROUND_COLOR @"loginBtnPressedBackgroundColor" //登录按钮按下背景色（仅ios）
+#define LOGIN_BTN_DISABLED_BACKGROUND_COLOR @"loginBtnDisabledBackgroundColor" //登录按钮失效背景色（仅ios）
 #define LOGIN_BTN_CORNER_RADIUS         @"loginBtnCornerRadius"     //登录按钮圆角（仅ios）
 #define LOGIN_BTN_X                     @"loginBtnX"                //登录按钮相对于屏幕左边x轴偏移
 #define LOGIN_BTN_Y                     @"loginBtnY"                //登录按钮相对于d导航栏下边缘y偏移
@@ -881,11 +882,13 @@ RCT_EXPORT_METHOD(setTimeWithConfig: (double)timeInter )
         UIColor *pressedColor = [configParams[LOGIN_BTN_PRESSED_BACKGROUND_COLOR] isKindOfClass:[NSNumber class]]
             ? UIColorFromRGBValue([configParams[LOGIN_BTN_PRESSED_BACKGROUND_COLOR] integerValue])
             : normalColor;
+        UIColor *disabledColor = [configParams[LOGIN_BTN_DISABLED_BACKGROUND_COLOR] isKindOfClass:[NSNumber class]]
+            ? UIColorFromRGBValue([configParams[LOGIN_BTN_DISABLED_BACKGROUND_COLOR] integerValue])
+            : [normalColor colorWithAlphaComponent:0.45];
         UIImage *normalImage = [self resizableImageWithColor:normalColor cornerRadius:cornerRadius];
         UIImage *pressedImage = [self resizableImageWithColor:pressedColor cornerRadius:cornerRadius];
-        // Keep the primary action visually available while the SDK still enforces
-        // consent and presents its second-confirmation dialog when unchecked.
-        config.logBtnImgs = @[normalImage, normalImage, pressedImage];
+        UIImage *disabledImage = [self resizableImageWithColor:disabledColor cornerRadius:cornerRadius];
+        config.logBtnImgs = @[normalImage, disabledImage, pressedImage];
     }
     if(configParams[LOGIN_BTN_X]&&configParams[LOGIN_BTN_Y]&&configParams[LOGIN_BTN_W]&&configParams[LOGIN_BTN_H]){
         CGFloat loginBtnX = [configParams[LOGIN_BTN_X] floatValue];

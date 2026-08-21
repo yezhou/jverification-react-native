@@ -316,6 +316,7 @@ export default class JVerification {
      *       loginBtnSelectedImage: string             //登录按钮按下图片  (仅ios,三个同时设置生效）
      *       loginBtnBackgroundColor: int              //登录按钮正常/失效背景色（仅ios，优先于图片）
      *       loginBtnPressedBackgroundColor: int       //登录按钮按下背景色（仅ios）
+     *       loginBtnDisabledBackgroundColor: int      //登录按钮失效背景色（仅ios）
      *       loginBtnCornerRadius: number              //登录按钮圆角（仅ios）
      *       loginBtnX: int                            //登录按钮相对于屏幕左边x轴偏移
      *       loginBtnY: int                            //登录按钮相对于标题栏下边缘y偏移
