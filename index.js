@@ -344,6 +344,9 @@ export default class JVerification {
      *       privacyCheckboxSize:int                   //设置隐私条款checkbox尺寸 默认是10
      *       privacyCheckedColor: int                  //隐私条款复选框选中品牌色（仅ios，优先于图片）
      *       privacyUncheckedBorderColor: int          //隐私条款复选框未选中描边色（仅ios，优先于图片）
+     *       customPrivacyAlertEnabled: boolean        //未勾选时使用可点击的原生确认弹窗（仅ios）
+     *       customPrivacyAlertMessage: string         //原生确认弹窗说明（仅ios）
+     *       customPrivacyAlertCancelText: string      //原生确认弹窗取消文案（仅ios）
      *       isAlertPrivacyVC: boolean                 //是否在未勾选隐私协议的情况下 弹窗提示窗口 iOS
      *       enablePrivacyCheckDialog: boolean         //是否在未勾选隐私协议的情况下 弹窗提示窗口 Android
      *

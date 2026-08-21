@@ -120,6 +120,9 @@
 #define PRIVACY_CHECKBOX_SIZE           @"privacyCheckboxSize"      //checkBox显示和点击区域尺寸
 #define PRIVACY_CHECKED_COLOR           @"privacyCheckedColor"      //checkBox选中品牌色（仅ios，优先于图片）
 #define PRIVACY_UNCHECKED_BORDER_COLOR  @"privacyUncheckedBorderColor" //checkBox未选中描边色（仅ios，优先于图片）
+#define CUSTOM_PRIVACY_ALERT_ENABLED    @"customPrivacyAlertEnabled" //未勾选时使用可点击的原生确认弹窗（仅ios）
+#define CUSTOM_PRIVACY_ALERT_MESSAGE    @"customPrivacyAlertMessage" //原生确认弹窗说明（仅ios）
+#define CUSTOM_PRIVACY_ALERT_CANCEL_TEXT @"customPrivacyAlertCancelText" //原生确认弹窗取消文案（仅ios）
 #define CHECK_VIEW_CONSTRAINTS          @"checkViewConstraints"     //checkBox布局对象
 #define IS_ALERT_PRIVACYVC              @"isAlertPrivacyVC"         //是否在未勾选隐私协议的情况下 弹窗提示窗口
 //协议
@@ -1048,14 +1051,61 @@ RCT_EXPORT_METHOD(setTimeWithConfig: (double)timeInter )
                                                  checked:NO
                                                tintColor:uncheckedColor];
     }
-    if ([configParams[UNCHECK_BOX_CALLBACK] isKindOfClass:[NSNumber class]]) {
-        BOOL isNeedCallBack = [configParams[UNCHECK_BOX_CALLBACK] boolValue];
-        if (isNeedCallBack) {
-              __weak __typeof(self)weakSelf = self;
-            config.customPrivacyAlertViewBlock = ^(UIViewController *vc , NSArray *appPrivacys,void(^loginAction)(void)){
-                [weakSelf sendUncheckBoxEvent];
-            };
-        }
+    BOOL useUncheckCallback = [configParams[UNCHECK_BOX_CALLBACK] isKindOfClass:[NSNumber class]]
+        && [configParams[UNCHECK_BOX_CALLBACK] boolValue];
+    BOOL useCustomPrivacyAlert = [configParams[CUSTOM_PRIVACY_ALERT_ENABLED] isKindOfClass:[NSNumber class]]
+        && [configParams[CUSTOM_PRIVACY_ALERT_ENABLED] boolValue];
+    if (useUncheckCallback) {
+        __weak __typeof(self)weakSelf = self;
+        config.customPrivacyAlertViewBlock = ^(UIViewController *vc , NSArray *appPrivacys,void(^loginAction)(void)){
+            [weakSelf sendUncheckBoxEvent];
+        };
+    } else if (useCustomPrivacyAlert) {
+        NSString *alertTitle = [configParams[AGREEMENT_ALERT_VIEW_TITLE_TEXT] isKindOfClass:[NSString class]]
+            ? configParams[AGREEMENT_ALERT_VIEW_TITLE_TEXT]
+            : @"请阅读并同意以下协议";
+        NSString *alertMessage = [configParams[CUSTOM_PRIVACY_ALERT_MESSAGE] isKindOfClass:[NSString class]]
+            ? configParams[CUSTOM_PRIVACY_ALERT_MESSAGE]
+            : @"请先阅读并同意页面中的服务条款与隐私政策。";
+        NSString *agreeText = [configParams[AGREEMENT_ALERT_VIEW_LOG_BTN_TEXT] isKindOfClass:[NSString class]]
+            ? configParams[AGREEMENT_ALERT_VIEW_LOG_BTN_TEXT]
+            : @"同意并继续";
+        NSString *cancelText = [configParams[CUSTOM_PRIVACY_ALERT_CANCEL_TEXT] isKindOfClass:[NSString class]]
+            ? configParams[CUSTOM_PRIVACY_ALERT_CANCEL_TEXT]
+            : @"取消";
+        UIColor *tintColor = [configParams[LOGIN_BTN_BACKGROUND_COLOR] isKindOfClass:[NSNumber class]]
+            ? UIColorFromRGBValue([configParams[LOGIN_BTN_BACKGROUND_COLOR] integerValue])
+            : UIColor.systemBlueColor;
+
+        // JVerification explicitly keeps the login button clickable whenever
+        // customPrivacyAlertViewBlock is present. Consent is still an explicit
+        // user action: only the affirmative alert action invokes loginAction.
+        config.customPrivacyAlertViewBlock = ^(UIViewController *vc, NSArray *appPrivacys, void(^loginAction)(void)) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if ([vc.presentedViewController isKindOfClass:UIAlertController.class]) {
+                    return;
+                }
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:alertTitle
+                                                                                message:alertMessage
+                                                                         preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:cancelText
+                                                                        style:UIAlertActionStyleCancel
+                                                                      handler:nil];
+                UIAlertAction *agreeAction = [UIAlertAction actionWithTitle:agreeText
+                                                                       style:UIAlertActionStyleDefault
+                                                                     handler:^(__unused UIAlertAction *action) {
+                    if (loginAction) {
+                        loginAction();
+                    }
+                }];
+                [alert addAction:cancelAction];
+                [alert addAction:agreeAction];
+                alert.preferredAction = agreeAction;
+                alert.view.tintColor = tintColor;
+                [vc presentViewController:alert animated:YES completion:nil];
+            });
+        };
+        config.smsCustomPrivacyAlertViewBlock = config.customPrivacyAlertViewBlock;
     }
     
     
@@ -1078,10 +1128,11 @@ RCT_EXPORT_METHOD(setTimeWithConfig: (double)timeInter )
     
     //二次弹窗
     if(configParams[IS_ALERT_PRIVACYVC]){
-        config.isAlertPrivacyVC = [configParams[IS_ALERT_PRIVACYVC] boolValue];
-        config.isSmsAlertPrivacyVC = [configParams[IS_ALERT_PRIVACYVC] boolValue];
-        config.agreementAlertViewShowWindow = YES;
-        config.smsAgreementAlertViewShowWindow = YES;
+        BOOL useSdkPrivacyAlert = [configParams[IS_ALERT_PRIVACYVC] boolValue] && !useCustomPrivacyAlert;
+        config.isAlertPrivacyVC = useSdkPrivacyAlert;
+        config.isSmsAlertPrivacyVC = useSdkPrivacyAlert;
+        config.agreementAlertViewShowWindow = useSdkPrivacyAlert;
+        config.smsAgreementAlertViewShowWindow = useSdkPrivacyAlert;
     }
     
     NSDictionary *agreementAlertViewUIFrames = configParams[AGREEMENT_ALERT_VIEW_UI_FRAMES];
