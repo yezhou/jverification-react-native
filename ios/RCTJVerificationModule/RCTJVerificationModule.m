@@ -85,6 +85,9 @@
 #define LOGIN_BTN_NORMAL_IMAGE          @"loginBtnNormalImage"      //登录按钮正常图片 （仅ios,三个同时设置生效）
 #define LOGIN_BTN_DISABLED_IMAGE        @"loginBtnDisabledImage"    //登录按钮失效图片  (仅ios,三个同时设置生效)
 #define LOGIN_BTN_SELECTED_IMAGE        @"loginBtnSelectedImage"    //登录按钮按下图片  (仅ios,三个同时设置生效）
+#define LOGIN_BTN_BACKGROUND_COLOR      @"loginBtnBackgroundColor"  //登录按钮正常/失效背景色（仅ios）
+#define LOGIN_BTN_PRESSED_BACKGROUND_COLOR @"loginBtnPressedBackgroundColor" //登录按钮按下背景色（仅ios）
+#define LOGIN_BTN_CORNER_RADIUS         @"loginBtnCornerRadius"     //登录按钮圆角（仅ios）
 #define LOGIN_BTN_X                     @"loginBtnX"                //登录按钮相对于屏幕左边x轴偏移
 #define LOGIN_BTN_Y                     @"loginBtnY"                //登录按钮相对于d导航栏下边缘y偏移
 #define LOGIN_BTN_W                     @"loginBtnW"                //登录按钮宽度
@@ -114,6 +117,9 @@
 #define PRIVACY_CHECK_ENABLE            @"privacyCheckEnable"       //checkBox默认状态 默认:NO
 #define PRIVACY_CHECKED_IMAGE           @"privacyCheckedImage"      //checkBox选中时图片
 #define PRIVACY_UNCHECKED_IMAGE         @"privacyUncheckedImage"    //checkBox未选中时图片
+#define PRIVACY_CHECKBOX_SIZE           @"privacyCheckboxSize"      //checkBox显示和点击区域尺寸
+#define PRIVACY_CHECKED_COLOR           @"privacyCheckedColor"      //checkBox选中品牌色（仅ios，优先于图片）
+#define PRIVACY_UNCHECKED_BORDER_COLOR  @"privacyUncheckedBorderColor" //checkBox未选中描边色（仅ios，优先于图片）
 #define CHECK_VIEW_CONSTRAINTS          @"checkViewConstraints"     //checkBox布局对象
 #define IS_ALERT_PRIVACYVC              @"isAlertPrivacyVC"         //是否在未勾选隐私协议的情况下 弹窗提示窗口
 //协议
@@ -864,6 +870,20 @@ RCT_EXPORT_METHOD(setTimeWithConfig: (double)timeInter )
         UIImage *loginBtnSelectedImage = [self imageNamed:configParams[LOGIN_BTN_SELECTED_IMAGE]];
         config.logBtnImgs = @[loginBtnNormalImage,loginBtnDisabledImage,loginBtnSelectedImage];
     }
+    if ([configParams[LOGIN_BTN_BACKGROUND_COLOR] isKindOfClass:[NSNumber class]]) {
+        CGFloat cornerRadius = [configParams[LOGIN_BTN_CORNER_RADIUS] isKindOfClass:[NSNumber class]]
+            ? [configParams[LOGIN_BTN_CORNER_RADIUS] floatValue]
+            : 14.0;
+        UIColor *normalColor = UIColorFromRGBValue([configParams[LOGIN_BTN_BACKGROUND_COLOR] integerValue]);
+        UIColor *pressedColor = [configParams[LOGIN_BTN_PRESSED_BACKGROUND_COLOR] isKindOfClass:[NSNumber class]]
+            ? UIColorFromRGBValue([configParams[LOGIN_BTN_PRESSED_BACKGROUND_COLOR] integerValue])
+            : normalColor;
+        UIImage *normalImage = [self resizableImageWithColor:normalColor cornerRadius:cornerRadius];
+        UIImage *pressedImage = [self resizableImageWithColor:pressedColor cornerRadius:cornerRadius];
+        // Keep the primary action visually available while the SDK still enforces
+        // consent and presents its second-confirmation dialog when unchecked.
+        config.logBtnImgs = @[normalImage, normalImage, pressedImage];
+    }
     if(configParams[LOGIN_BTN_X]&&configParams[LOGIN_BTN_Y]&&configParams[LOGIN_BTN_W]&&configParams[LOGIN_BTN_H]){
         CGFloat loginBtnX = [configParams[LOGIN_BTN_X] floatValue];
         CGFloat loginBtnY = [configParams[LOGIN_BTN_Y] floatValue];
@@ -1000,11 +1020,33 @@ RCT_EXPORT_METHOD(setTimeWithConfig: (double)timeInter )
     if([configParams[PRIVACY_CHECK_ENABLE] isKindOfClass:[NSNumber class]]){
         config.privacyState = [configParams[PRIVACY_CHECK_ENABLE] boolValue];
     }
+    CGFloat configuredCheckboxSize = [configParams[PRIVACY_CHECKBOX_SIZE] isKindOfClass:[NSNumber class]]
+        ? [configParams[PRIVACY_CHECKBOX_SIZE] floatValue]
+        : 0;
+    CGFloat checkboxImageSize = configuredCheckboxSize > 0 ? configuredCheckboxSize : 18;
     if(configParams[PRIVACY_CHECKED_IMAGE]){
         config.checkedImg = [self imageNamed:configParams[PRIVACY_CHECKED_IMAGE]];
     }
     if(configParams[PRIVACY_UNCHECKED_IMAGE]){
         config.uncheckedImg = [self imageNamed:configParams[PRIVACY_UNCHECKED_IMAGE]];
+    }
+    if (!config.checkedImg) {
+        config.checkedImg = [self imageNamed:@"checkBox_selected"];
+    }
+    if (!config.uncheckedImg) {
+        config.uncheckedImg = [self imageNamed:@"checkBox_unSelected"];
+    }
+    if ([configParams[PRIVACY_CHECKED_COLOR] isKindOfClass:[NSNumber class]]) {
+        UIColor *checkedColor = UIColorFromRGBValue([configParams[PRIVACY_CHECKED_COLOR] integerValue]);
+        config.checkedImg = [self checkboxImageWithSize:checkboxImageSize
+                                               checked:YES
+                                             tintColor:checkedColor];
+    }
+    if ([configParams[PRIVACY_UNCHECKED_BORDER_COLOR] isKindOfClass:[NSNumber class]]) {
+        UIColor *uncheckedColor = UIColorFromRGBValue([configParams[PRIVACY_UNCHECKED_BORDER_COLOR] integerValue]);
+        config.uncheckedImg = [self checkboxImageWithSize:checkboxImageSize
+                                                 checked:NO
+                                               tintColor:uncheckedColor];
     }
     if ([configParams[UNCHECK_BOX_CALLBACK] isKindOfClass:[NSNumber class]]) {
         BOOL isNeedCallBack = [configParams[UNCHECK_BOX_CALLBACK] boolValue];
@@ -1017,10 +1059,12 @@ RCT_EXPORT_METHOD(setTimeWithConfig: (double)timeInter )
     }
     
     
-    CGFloat privacyCheckboxW = config.uncheckedImg.size.width;
-    CGFloat privacyCheckboxH = config.uncheckedImg.size.height;
-    JVLayoutConstraint *constraintX = [JVLayoutConstraint constraintWithAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:JVLayoutItemPrivacy attribute:NSLayoutAttributeLeft multiplier:1 constant:-15];
-    JVLayoutConstraint *constraintY = [JVLayoutConstraint constraintWithAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:JVLayoutItemPrivacy attribute:NSLayoutAttributeTop multiplier:1 constant:2];
+    CGFloat privacyCheckboxW = configuredCheckboxSize > 0 ? configuredCheckboxSize : config.uncheckedImg.size.width;
+    CGFloat privacyCheckboxH = configuredCheckboxSize > 0 ? configuredCheckboxSize : config.uncheckedImg.size.height;
+    privacyCheckboxW = privacyCheckboxW > 0 ? privacyCheckboxW : 18;
+    privacyCheckboxH = privacyCheckboxH > 0 ? privacyCheckboxH : 18;
+    JVLayoutConstraint *constraintX = [JVLayoutConstraint constraintWithAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:JVLayoutItemPrivacy attribute:NSLayoutAttributeLeft multiplier:1 constant:-(privacyCheckboxW + 8)];
+    JVLayoutConstraint *constraintY = [JVLayoutConstraint constraintWithAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:JVLayoutItemPrivacy attribute:NSLayoutAttributeTop multiplier:1 constant:0];
     JVLayoutConstraint *constraintW = [JVLayoutConstraint constraintWithAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:JVLayoutItemNone attribute:NSLayoutAttributeWidth multiplier:1 constant:privacyCheckboxW];
     JVLayoutConstraint *constraintH = [JVLayoutConstraint constraintWithAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:JVLayoutItemNone attribute:NSLayoutAttributeHeight multiplier:1 constant:privacyCheckboxH];
     config.checkViewConstraints = @[constraintX,constraintY,constraintW,constraintH];
@@ -1029,6 +1073,7 @@ RCT_EXPORT_METHOD(setTimeWithConfig: (double)timeInter )
     if(configParams[CHECK_VIEW_CONSTRAINTS]){
         NSArray *checkViewConstraints= [RCTJVerificationModule configConstraintWithAttributes:configParams[CHECK_VIEW_CONSTRAINTS]];
         config.checkViewConstraints = checkViewConstraints;
+        config.checkViewHorizontalConstraints = checkViewConstraints;
     }
     
     //二次弹窗
@@ -1759,6 +1804,54 @@ RCT_EXPORT_METHOD(setTimeWithConfig: (double)timeInter )
     }
     NSString *bundlePath = [[NSBundle mainBundle] pathForResource:JVERIFICATION_RESOURCE ofType:@"bundle"];
     UIImage *image= [UIImage imageWithContentsOfFile:[bundlePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",imageName]]];
+    return image;
+}
+
+- (UIImage *)resizableImageWithColor:(UIColor *)color cornerRadius:(CGFloat)cornerRadius
+{
+    CGFloat side = MAX(56.0, cornerRadius * 2.0 + 2.0);
+    CGSize size = CGSizeMake(side, side);
+    UIGraphicsBeginImageContextWithOptions(size, NO, 0);
+    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:(CGRect){CGPointZero, size} cornerRadius:cornerRadius];
+    [color setFill];
+    [path fill];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    CGFloat capInset = MIN(cornerRadius + 1.0, side / 2.0 - 1.0);
+    return [image resizableImageWithCapInsets:UIEdgeInsetsMake(capInset, capInset, capInset, capInset)
+                                  resizingMode:UIImageResizingModeStretch];
+}
+
+- (UIImage *)checkboxImageWithSize:(CGFloat)size checked:(BOOL)checked tintColor:(UIColor *)tintColor
+{
+    CGFloat side = MAX(18.0, size);
+    CGSize imageSize = CGSizeMake(side, side);
+    UIGraphicsBeginImageContextWithOptions(imageSize, NO, 0);
+    if (checked) {
+        UIBezierPath *background = [UIBezierPath bezierPathWithRoundedRect:CGRectInset((CGRect){CGPointZero, imageSize}, 0.5, 0.5)
+                                                              cornerRadius:side * 0.27];
+        [tintColor setFill];
+        [background fill];
+
+        UIBezierPath *checkmark = [UIBezierPath bezierPath];
+        [checkmark moveToPoint:CGPointMake(side * 0.27, side * 0.51)];
+        [checkmark addLineToPoint:CGPointMake(side * 0.43, side * 0.67)];
+        [checkmark addLineToPoint:CGPointMake(side * 0.74, side * 0.34)];
+        checkmark.lineWidth = MAX(2.0, side * 0.095);
+        checkmark.lineCapStyle = kCGLineCapRound;
+        checkmark.lineJoinStyle = kCGLineJoinRound;
+        [UIColor.whiteColor setStroke];
+        [checkmark stroke];
+    } else {
+        CGFloat strokeWidth = MAX(1.5, side * 0.07);
+        UIBezierPath *border = [UIBezierPath bezierPathWithRoundedRect:CGRectInset((CGRect){CGPointZero, imageSize}, strokeWidth / 2.0, strokeWidth / 2.0)
+                                                          cornerRadius:side * 0.27];
+        border.lineWidth = strokeWidth;
+        [tintColor setStroke];
+        [border stroke];
+    }
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
     return image;
 }
 

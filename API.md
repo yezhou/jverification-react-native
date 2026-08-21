@@ -194,6 +194,9 @@ static addLoginCustomConfig(customConfigParams: {
     loginBtnNormalImage?: string,               // 登录按钮正常图片 （仅ios,三个同时设置生效）
     loginBtnDisabledImage?: string,             // 登录按钮失效图片 (仅ios,三个同时设置生效）
     loginBtnSelectedImage?: string,             // 登录按钮按下图片 (仅ios,三个同时设置生效）
+    loginBtnBackgroundColor?: number,           // 登录按钮正常/失效背景色（仅ios，优先于图片）
+    loginBtnPressedBackgroundColor?: number,    // 登录按钮按下背景色（仅ios）
+    loginBtnCornerRadius?: number,              // 登录按钮圆角（仅ios）
     loginBtnX?: number,                         // 登录按钮相对于屏幕左边x轴偏移
     loginBtnY?: number,                         // 登录按钮相对于标题栏下边缘y偏移
     loginBtnW?: number,                         // 登录按钮宽度
@@ -225,6 +228,8 @@ static addLoginCustomConfig(customConfigParams: {
     privacyCheckedImage?: string,               // 隐私条款复选框选中图片
     privacyUncheckedImage?: string,             // 隐私条款复选框未选中图片
     privacyCheckboxSize?: number,               // 设置隐私条款checkbox尺寸 默认是10
+    privacyCheckedColor?: number,               // 隐私条款复选框选中品牌色（仅ios，优先于图片）
+    privacyUncheckedBorderColor?: number,       // 隐私条款复选框未选中描边色（仅ios，优先于图片）
     isAlertPrivacyVC?: boolean,                 // 是否在未勾选隐私协议的情况下 弹窗提示窗口 iOS
     enablePrivacyCheckDialog?: boolean,         // 是否在未勾选隐私协议的情况下 弹窗提示窗口 Android
 
