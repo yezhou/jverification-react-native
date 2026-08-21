@@ -1161,10 +1161,12 @@ public class JVerificationModule extends ReactContextBaseJavaModule {
                         continue;
                     }
                     String type = widgetMap.hasKey("type") ? widgetMap.getString("type") : "";
+                    boolean isPrivacyCheckDialog = widgetMap.hasKey("isPrivacyCheckDialog")
+                            && widgetMap.getBoolean("isPrivacyCheckDialog");
                     if("button".equals(type)) {
-                        addCustomButtonWidgets(widgetMap, builder, false);
+                        addCustomButtonWidgets(widgetMap, builder, isPrivacyCheckDialog);
                     } else if("textView".equals(type)) {
-                        addCustomTextWidgets(widgetMap, builder, false);
+                        addCustomTextWidgets(widgetMap, builder, isPrivacyCheckDialog);
                     }
                 }
             }
@@ -1227,6 +1229,10 @@ public class JVerificationModule extends ReactContextBaseJavaModule {
         JLogger.d("addCustomTextWidgets: para = " + para);
 
         TextView customView = new TextView(reactContext);
+
+        if(para.hasKey("accessibilityLabel")) {
+            customView.setContentDescription(para.getString("accessibilityLabel"));
+        }
 
         //设置text
         String title = para.hasKey("title") ? para.getString("title") : "";
@@ -1366,6 +1372,10 @@ public class JVerificationModule extends ReactContextBaseJavaModule {
         JLogger.d("addCustomButtonWidgets: para = " + para);
 
         Button customView = new Button(reactContext);
+
+        if(para.hasKey("accessibilityLabel")) {
+            customView.setContentDescription(para.getString("accessibilityLabel"));
+        }
 
         //设置text
         String title = para.hasKey("title") ? para.getString("title") : "";

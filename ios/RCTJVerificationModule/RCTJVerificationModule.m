@@ -1,4 +1,20 @@
 #import "RCTJVerificationModule.h"
+
+@interface RCTJVerificationAgreementAlertCloseButton : UIButton
+@property (nonatomic, copy) void (^tapHandler)(void);
+- (void)invokeTapHandler;
+@end
+
+@implementation RCTJVerificationAgreementAlertCloseButton
+- (void)invokeTapHandler
+{
+    void (^handler)(void) = self.tapHandler;
+    if (handler) {
+        handler();
+    }
+}
+@end
+
 //常量
 #define ENABLE         @"enable"
 #define TIME           @"time"
@@ -162,7 +178,17 @@
 #define AGREEMENT_ALERT_VIEW_LOGIN_BTN_NORMAL_IMAGE_PATH @"agreementAlertViewLoginBtnNormalImagePath"    //登录按钮激活状态背景图
 #define AGREEMENT_ALERT_VIEW_LOGIN_BTN_PRESSED_IMAGE_PATH @"agreementAlertViewLoginBtnPressedImagePath"  //登录按钮高亮状态背景图
 #define AGREEMENT_ALERT_VIEW_LOGIN_BTN_UNABLE_IMAGE_PATH @"agreementAlertViewLoginBtnUnableImagePath"    //登录按钮失效状态背景图
+#define AGREEMENT_ALERT_VIEW_LOGIN_BTN_BACKGROUND_COLOR @"agreementAlertViewLoginBtnBackgroundColor" //登录按钮激活状态背景色
+#define AGREEMENT_ALERT_VIEW_LOGIN_BTN_PRESSED_BACKGROUND_COLOR @"agreementAlertViewLoginBtnPressedBackgroundColor" //登录按钮高亮状态背景色
+#define AGREEMENT_ALERT_VIEW_LOGIN_BTN_DISABLED_BACKGROUND_COLOR @"agreementAlertViewLoginBtnDisabledBackgroundColor" //登录按钮失效状态背景色
+#define AGREEMENT_ALERT_VIEW_LOGIN_BTN_CORNER_RADIUS @"agreementAlertViewLoginBtnCornerRadius" //登录按钮圆角
 #define AGREEMENT_ALERT_VIEW_LOG_BTN_TEXT_COLOR @"agreementAlertViewLogBtnTextColor"            //协议二次弹窗登录按钮文本颜色
+#define AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_ENABLED @"agreementAlertViewCloseButtonEnabled" //是否显示协议二次弹窗关闭按钮
+#define AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_TEXT @"agreementAlertViewCloseButtonText" //协议二次弹窗关闭按钮文本
+#define AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_TEXT_COLOR @"agreementAlertViewCloseButtonTextColor" //协议二次弹窗关闭按钮颜色
+#define AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_TEXT_SIZE @"agreementAlertViewCloseButtonTextSize" //协议二次弹窗关闭按钮字号
+#define AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_FRAME @"agreementAlertViewCloseButtonFrame" //协议二次弹窗关闭按钮frame
+#define AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_ACCESSIBILITY_LABEL @"agreementAlertViewCloseButtonAccessibilityLabel" //协议二次弹窗关闭按钮无障碍文案
 
 
 
@@ -1339,15 +1365,80 @@ RCT_EXPORT_METHOD(setTimeWithConfig: (double)timeInter )
         UIImage *agreementAlertViewLoginBtnPressedImage = [self imageNamed:configParams[AGREEMENT_ALERT_VIEW_LOGIN_BTN_PRESSED_IMAGE_PATH]];
         UIImage *agreementAlertViewLoginBtnUnableImage = [self imageNamed:configParams[AGREEMENT_ALERT_VIEW_LOGIN_BTN_UNABLE_IMAGE_PATH]];
         if(agreementAlertViewLoginBtnNormalImage && agreementAlertViewLoginBtnPressedImage && agreementAlertViewLoginBtnUnableImage){
-            NSArray * agreementAlertViewLogBtnImgs =[[NSArray alloc]initWithObjects:agreementAlertViewLoginBtnNormalImage,agreementAlertViewLoginBtnPressedImage,agreementAlertViewLoginBtnUnableImage,nil];
+            NSArray * agreementAlertViewLogBtnImgs =[[NSArray alloc]initWithObjects:agreementAlertViewLoginBtnNormalImage,agreementAlertViewLoginBtnUnableImage,agreementAlertViewLoginBtnPressedImage,nil];
                 config.agreementAlertViewLogBtnImgs = agreementAlertViewLogBtnImgs;
                 config.smsAgreementAlertViewLogBtnImgs = agreementAlertViewLogBtnImgs;
         }
+    }
+
+    if ([configParams[AGREEMENT_ALERT_VIEW_LOGIN_BTN_BACKGROUND_COLOR] isKindOfClass:[NSNumber class]]) {
+        CGFloat cornerRadius = [configParams[AGREEMENT_ALERT_VIEW_LOGIN_BTN_CORNER_RADIUS] isKindOfClass:[NSNumber class]]
+            ? [configParams[AGREEMENT_ALERT_VIEW_LOGIN_BTN_CORNER_RADIUS] floatValue]
+            : 12.0;
+        UIColor *normalColor = UIColorFromRGBValue([configParams[AGREEMENT_ALERT_VIEW_LOGIN_BTN_BACKGROUND_COLOR] integerValue]);
+        UIColor *pressedColor = [configParams[AGREEMENT_ALERT_VIEW_LOGIN_BTN_PRESSED_BACKGROUND_COLOR] isKindOfClass:[NSNumber class]]
+            ? UIColorFromRGBValue([configParams[AGREEMENT_ALERT_VIEW_LOGIN_BTN_PRESSED_BACKGROUND_COLOR] integerValue])
+            : normalColor;
+        UIColor *disabledColor = [configParams[AGREEMENT_ALERT_VIEW_LOGIN_BTN_DISABLED_BACKGROUND_COLOR] isKindOfClass:[NSNumber class]]
+            ? UIColorFromRGBValue([configParams[AGREEMENT_ALERT_VIEW_LOGIN_BTN_DISABLED_BACKGROUND_COLOR] integerValue])
+            : [normalColor colorWithAlphaComponent:0.45];
+        UIImage *normalImage = [self resizableImageWithColor:normalColor cornerRadius:cornerRadius];
+        UIImage *disabledImage = [self resizableImageWithColor:disabledColor cornerRadius:cornerRadius];
+        UIImage *pressedImage = [self resizableImageWithColor:pressedColor cornerRadius:cornerRadius];
+        NSArray *agreementAlertViewLogBtnImgs = @[normalImage, disabledImage, pressedImage];
+        config.agreementAlertViewLogBtnImgs = agreementAlertViewLogBtnImgs;
+        config.smsAgreementAlertViewLogBtnImgs = agreementAlertViewLogBtnImgs;
     }
     
     if (configParams[AGREEMENT_ALERT_VIEW_LOG_BTN_TEXT_COLOR]) {
         config.agreementAlertViewLogBtnTextColor = UIColorFromRGBValue([configParams[AGREEMENT_ALERT_VIEW_LOG_BTN_TEXT_COLOR] integerValue]);
         config.smsAgreementAlertViewLogBtnTextColor = UIColorFromRGBValue([configParams[AGREEMENT_ALERT_VIEW_LOG_BTN_TEXT_COLOR] integerValue]);
+    }
+
+    if ([configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_ENABLED] isKindOfClass:[NSNumber class]]
+        && [configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_ENABLED] boolValue]) {
+        NSString *closeText = [configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_TEXT] isKindOfClass:[NSString class]]
+            ? configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_TEXT]
+            : @"×";
+        NSString *accessibilityLabel = [configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_ACCESSIBILITY_LABEL] isKindOfClass:[NSString class]]
+            ? configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_ACCESSIBILITY_LABEL]
+            : @"Close";
+        UIColor *defaultCloseTextColor = UIColor.grayColor;
+        if (@available(iOS 13.0, *)) {
+            defaultCloseTextColor = UIColor.secondaryLabelColor;
+        }
+        UIColor *closeTextColor = [configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_TEXT_COLOR] isKindOfClass:[NSNumber class]]
+            ? UIColorFromRGBValue([configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_TEXT_COLOR] integerValue])
+            : defaultCloseTextColor;
+        CGFloat closeTextSize = [configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_TEXT_SIZE] isKindOfClass:[NSNumber class]]
+            ? [configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_TEXT_SIZE] floatValue]
+            : 26.0;
+        NSArray *closeFrameValues = [configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_FRAME] isKindOfClass:[NSArray class]]
+            ? configParams[AGREEMENT_ALERT_VIEW_CLOSE_BUTTON_FRAME]
+            : nil;
+        CGRect closeFrame = CGRectMake(0, 0, 44, 44);
+        if (closeFrameValues.count >= 4) {
+            closeFrame = CGRectMake([closeFrameValues[0] floatValue],
+                                    [closeFrameValues[1] floatValue],
+                                    [closeFrameValues[2] floatValue],
+                                    [closeFrameValues[3] floatValue]);
+        }
+
+        void (^addCloseButton)(UIView *, void(^)(void)) = ^(UIView *superView, void(^hidAlertView)(void)) {
+            RCTJVerificationAgreementAlertCloseButton *closeButton = [RCTJVerificationAgreementAlertCloseButton buttonWithType:UIButtonTypeSystem];
+            closeButton.frame = closeFrame;
+            closeButton.tapHandler = hidAlertView;
+            closeButton.accessibilityLabel = accessibilityLabel;
+            closeButton.accessibilityIdentifier = @"jverification_agreement_alert_close";
+            closeButton.titleLabel.font = [UIFont systemFontOfSize:closeTextSize weight:UIFontWeightRegular];
+            [closeButton setTitle:closeText forState:UIControlStateNormal];
+            [closeButton setTitleColor:closeTextColor forState:UIControlStateNormal];
+            [closeButton addTarget:closeButton action:@selector(invokeTapHandler) forControlEvents:UIControlEventTouchUpInside];
+            [superView addSubview:closeButton];
+            [superView bringSubviewToFront:closeButton];
+        };
+        config.customAgreementAlertView = addCloseButton;
+        config.smsCustomAgreementAlertView = addCloseButton;
     }
     
     NSDictionary *smsUIConfig = configParams[SMS_UI_CONFIG];

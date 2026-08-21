@@ -56,9 +56,11 @@ export default class JVerification {
             /* 若 isSingleLine = false 时，iOS 端 lines 设置失效，会自适应内容高度，最大高度为设置的 height */
 
             this.isShowUnderline = false;  // 是否显示下划线，默认：不显示
+            this.accessibilityLabel = null;  // 无障碍朗读文案 (android only)
             // isClickEnable 已在构造函数中根据类型设置
 
             // 隐私协议二次弹窗专用 (android only)
+            this.isPrivacyCheckDialog = false;  // 是否将控件添加到隐私协议二次弹窗
             this.belowTheDialogContent = false;  // 是否在对话框内容下方
         }
 
@@ -77,10 +79,12 @@ export default class JVerification {
                 "backgroundColor": this.backgroundColor,
                 "isShowUnderline": this.isShowUnderline,
                 "isClickEnable": this.isClickEnable,
+                "accessibilityLabel": this.accessibilityLabel,
                 "btnNormalImageName": this.btnNormalImageName,
                 "btnPressedImageName": this.btnPressedImageName,
                 "lines": this.lines,
                 "isSingleLine": this.isSingleLine,
+                "isPrivacyCheckDialog": this.isPrivacyCheckDialog,
                 "belowTheDialogContent": this.belowTheDialogContent,
                 "left": this.left,
                 "top": this.top,
@@ -371,7 +375,17 @@ export default class JVerification {
      *       agreementAlertViewLoginBtnNormalImagePath: String      //协议二次弹窗登录按钮背景图片 - 激活状态的图片
      *       agreementAlertViewLoginBtnPressedImagePath: String     //协议二次弹窗登录按钮背景图片 - 高亮状态的图片
      *       agreementAlertViewLoginBtnUnableImagePath: String      //协议二次弹窗登录按钮背景图片 - 失效状态的图片
+     *       agreementAlertViewLoginBtnBackgroundColor: int         //协议二次弹窗登录按钮激活背景色（仅iOS，优先于图片）
+     *       agreementAlertViewLoginBtnPressedBackgroundColor: int  //协议二次弹窗登录按钮高亮背景色（仅iOS）
+     *       agreementAlertViewLoginBtnDisabledBackgroundColor: int //协议二次弹窗登录按钮失效背景色（仅iOS）
+     *       agreementAlertViewLoginBtnCornerRadius: number         //协议二次弹窗登录按钮圆角（仅iOS）
      *       agreementAlertViewLogBtnTextColor: int                 //协议二次弹窗登录按钮文本颜色
+     *       agreementAlertViewCloseButtonEnabled: boolean          //是否显示协议二次弹窗关闭按钮（仅iOS）
+     *       agreementAlertViewCloseButtonText: String              //协议二次弹窗关闭按钮文本（仅iOS）
+     *       agreementAlertViewCloseButtonTextColor: int            //协议二次弹窗关闭按钮颜色（仅iOS）
+     *       agreementAlertViewCloseButtonTextSize: number          //协议二次弹窗关闭按钮字号（仅iOS）
+     *       agreementAlertViewCloseButtonFrame: number[]           //协议二次弹窗关闭按钮frame [x,y,w,h]（仅iOS）
+     *       agreementAlertViewCloseButtonAccessibilityLabel: String //协议二次弹窗关闭按钮无障碍文案（仅iOS）
      *       agreementAlertViewUIFrames: object     //协议二次弹窗各控件的frame设置 { "superViewFrame": [left, top, width, height],"alertViewFrame": [left, top, width, height],"titleFrame": [left, top, width, height],"contentFrame": [left, top, width, height],"buttonFrame": [left, top, width, height]}
      *       //////////iOS 二次弹窗////////////
      * 

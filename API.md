@@ -503,7 +503,9 @@ class JVCustomWidget {
     isClickEnable: boolean;               // 是否可点击，默认：button 为 true，textView 为 false
     
     // Android 专用属性
+    isPrivacyCheckDialog?: boolean;      // 是否添加到隐私协议二次弹窗，默认：false
     belowTheDialogContent?: boolean;     // 是否在对话框内容下方（隐私协议二次弹窗专用）
+    accessibilityLabel?: string;         // 无障碍朗读文案
     
     // 方法
     toJsonMap(): object;                  // 转换为JSON对象，自动过滤null值
