@@ -1,4 +1,5 @@
 #import "RCTJVerificationModule.h"
+#import <React/RCTUtils.h>
 
 @interface RCTJVerificationAgreementAlertCloseButton : UIButton
 @property (nonatomic, copy) void (^tapHandler)(void);
@@ -513,10 +514,15 @@ RCT_EXPORT_METHOD(getAuthorizationWithController: (BOOL )enable
                   callback: (RCTResponseSenderBlock)callback)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        UIViewController *vc = [UIApplication sharedApplication].keyWindow.rootViewController;
-        UIViewController *topVC = vc;
-        if (topVC.presentedViewController) {
-            topVC = topVC.presentedViewController;
+        // React Native resolves the active UIWindowScene and walks presented controllers.
+        UIViewController *topVC = RCTPresentedViewController();
+        if (!topVC) {
+            NSDictionary *responseData = [self convertToResult:@(-1001) content:@"No active view controller"];
+            [self sendLoginEvent:responseData];
+            if (callback) {
+                callback(@[responseData]);
+            }
+            return;
         }
         
         [JVERIFICATIONService getAuthorizationWithController:topVC hide:enable animated: YES timeout:timeout completion:^(NSDictionary *result) {
@@ -550,10 +556,15 @@ RCT_EXPORT_METHOD(smsLogin: (BOOL )enable
                   callback: (RCTResponseSenderBlock)callback)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        UIViewController *vc = [UIApplication sharedApplication].keyWindow.rootViewController;
-        UIViewController *topVC = vc;
-        if (topVC.presentedViewController) {
-            topVC = topVC.presentedViewController;
+        // React Native resolves the active UIWindowScene and walks presented controllers.
+        UIViewController *topVC = RCTPresentedViewController();
+        if (!topVC) {
+            NSDictionary *responseData = [self convertToResult:@(-1001) content:@"No active view controller"];
+            [self sendLoginEvent:responseData];
+            if (callback) {
+                callback(@[responseData]);
+            }
+            return;
         }
         
         [JVERIFICATIONService getSMSAuthorizationWithController:topVC hide:enable animated:YES timeout:timeout completion:^(NSDictionary * _Nonnull result) {
