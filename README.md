@@ -98,3 +98,7 @@ Add to Targets: 选择第一个框框
 * 上报问题还麻烦先调用JVerification.setLoggerEnable( true)，拿到debug日志
 
  
+
+## Android release builds and R8
+
+Android consumer rules are included automatically for the bundled JVerification JAR and its three carrier SDK namespaces, which use reflection and JNI. The app can keep R8 full mode enabled. These scoped rules do not disable optimization globally. A cellular-network device is still required to validate successful one-tap login.
